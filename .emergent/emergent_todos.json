@@ -5,22 +5,22 @@
   },
   {
     "content": "2. lib/api.js — fix getLeaderboard to use daily_coins",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
-    "content": "3. screens/AuthScreen.js — full rewrite (auto-login, eye toggle, forgot pwd, referral, streak row)",
-    "status": "pending"
+    "content": "3. screens/AuthScreen.js — full rewrite",
+    "status": "in_progress"
   },
   {
     "content": "4. screens/HomeScreen.js — partner cards Alert + Super Offers nav fix",
     "status": "pending"
   },
   {
-    "content": "5. screens/SpecialOfferScreen.js — full rewrite (params, hero count, tabs, streak banner)",
+    "content": "5. screens/SpecialOfferScreen.js — full rewrite",
     "status": "pending"
   },
   {
-    "content": "6. screens/VerifyScreen.js — full rewrite (params, step circles, openOfferGate, success modal)",
+    "content": "6. screens/VerifyScreen.js — full rewrite",
     "status": "pending"
   },
   {
@@ -28,7 +28,7 @@
     "status": "pending"
   },
   {
-    "content": "8. screens/ProfileScreen.js — full rewrite (gradient avatar, member since, settings, nav.reset)",
+    "content": "8. screens/ProfileScreen.js — full rewrite",
     "status": "pending"
   },
   {
