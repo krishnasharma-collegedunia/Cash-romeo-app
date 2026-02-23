@@ -47,7 +47,7 @@ export default function CoinAnimation({ visible, onDone }) {
   if (!visible) return null;
 
   return (
-    <View style={styles.container} pointerEvents="none">
+    <View style={[styles.container, { pointerEvents: 'none' }]}>
       {coins.map(({ anim, opacity }, i) => {
         const angle = getAngle(i);
         const radius = 80;

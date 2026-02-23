@@ -44,7 +44,7 @@ export default function GemToast({ visible, message = '+1 Gem Earned!', onDone }
         styles.toast,
         { opacity, transform: [{ translateY }] },
       ]}
-      pointerEvents="none"
+      style={[styles.toast, { opacity, transform: [{ translateY }], pointerEvents: 'none' }]}
     >
       <Text style={styles.text}>💎 {message}</Text>
     </Animated.View>
