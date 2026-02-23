@@ -280,16 +280,31 @@ export const applyReferralCode = async (uid, referralCode) => {
 };
 
 // ─── LEADERBOARD ─────────────────────────────────────────────────
-export const getLeaderboard = async (limit = 20) => {
+// Ranked by daily_coins (resets at midnight) per v4 spec
+export const getLeaderboard = async (limit = 50) => {
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('id, name, email, coins, current_level')
-      .order('coins', { ascending: false })
+      .select('id, name, email, coins, daily_coins, current_level')
+      .order('daily_coins', { ascending: false })
       .limit(limit);
     if (error) throw new Error(error.message);
     return data;
   } catch (e) {
     throw new Error('Get leaderboard failed: ' + e.message);
+  }
+};
+
+// ─── REFERRAL COUNT ───────────────────────────────────────────────
+export const getReferralCount = async (uid) => {
+  try {
+    const { count, error } = await supabase
+      .from('referrals')
+      .select('*', { count: 'exact', head: true })
+      .eq('referrer_id', uid);
+    if (error) throw new Error(error.message);
+    return count ?? 0;
+  } catch (e) {
+    return 0;
   }
 };
