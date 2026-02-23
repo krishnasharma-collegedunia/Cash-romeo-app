@@ -1,11 +1,11 @@
 [
   {
     "content": "1. constants/theme.js — add avatarColor",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "2. lib/api.js — fix getLeaderboard to use daily_coins",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "3. screens/AuthScreen.js — full rewrite (auto-login, eye toggle, forgot pwd, referral, streak row)",
