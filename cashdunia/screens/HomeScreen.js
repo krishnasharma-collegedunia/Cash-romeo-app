@@ -255,7 +255,7 @@ export default function HomeScreen({ navigation }) {
         {/* ── SECTION 5: ACTIONS ROW ── */}
         <View style={styles.actionsRow}>
           {/* Card A – Super Offers */}
-          <TouchableOpacity style={styles.actionCardA} onPress={() => navigation.navigate('Offers')} activeOpacity={0.88}>
+          <TouchableOpacity style={styles.actionCardA} onPress={() => navigation.navigate('SpecialOffer', { level: profile?.current_level ?? 1 })} activeOpacity={0.88}>
             <LinearGradient colors={['#6B21A8', '#7C3AED']} style={styles.actionCardGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
               <View style={styles.actionCardTop}>
                 <Text style={styles.actionCardIcon}>🎯</Text>
