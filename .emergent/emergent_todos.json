@@ -5,10 +5,14 @@
   },
   {
     "content": "Phase 1: POC - Supabase schema setup + core flow test script",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Phase 2: Implement constants/theme.js + lib/supabase.js + lib/api.js",
+    "status": "in_progress"
+  },
+  {
+    "content": "Phase 2: Implement Zustand stores (authStore, userStore, uiStore)",
     "status": "pending"
   },
   {
@@ -24,15 +28,15 @@
     "status": "pending"
   },
   {
-    "content": "Phase 2: Implement Zustand stores (authStore, userStore, uiStore)",
-    "status": "pending"
-  },
-  {
     "content": "Phase 2: Final App.js + babel config setup",
     "status": "pending"
   },
   {
-    "content": "Phase 2: End-to-end testing + fix issues",
+    "content": "Phase 2: All user stories covered in development",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: End-to-end testing using Testing Agent",
     "status": "pending"
   }
 ]
