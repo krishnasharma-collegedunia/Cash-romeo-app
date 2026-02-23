@@ -1,149 +1,169 @@
 import React, { useState, useCallback } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ScrollView,
+  View, Text, TouchableOpacity, StyleSheet, FlatList, ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { C, LEVEL_CONFIG } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
-import { useUserStore } from '../store/userStore';
-import { getUser } from '../lib/api';
-import MockAdOverlay from '../components/MockAdOverlay';
+import { getOffers } from '../lib/api';
+import { supabase } from '../lib/supabase';
 
-const OFFER_DETAILS = {
-  simple: {
-    title: 'Watch & Earn',
-    description: 'Complete a simple 3-step offer to earn your coins reward.',
-    icon: '📺',
-    color: C.blue,
-    steps: [
-      { id: 1, text: 'Watch the advertisement', icon: '📺' },
-      { id: 2, text: 'Complete the short survey', icon: '📝' },
-      { id: 3, text: 'Verify your completion', icon: '✅' },
-    ],
-  },
-  install: {
-    title: 'App Install Offer',
-    description: 'Install the app and complete the 5-step verification to earn coins.',
-    icon: '📱',
-    color: C.primary,
-    steps: [
-      { id: 1, text: 'Watch the advertisement', icon: '📺' },
-      { id: 2, text: 'Download the promoted app', icon: '⬇️' },
-      { id: 3, text: 'Open the app once', icon: '📱' },
-      { id: 4, text: 'Complete in-app tutorial', icon: '🎯' },
-      { id: 5, text: 'Verify your completion', icon: '✅' },
-    ],
-  },
-};
-
-export default function SpecialOfferScreen({ navigation }) {
+export default function SpecialOfferScreen({ route, navigation }) {
   const { user: authUser } = useAuthStore();
-  const { profile } = useUserStore();
-  const [adVisible, setAdVisible] = useState(false);
-  const [adDone, setAdDone] = useState(false);
+  const level = route?.params?.level ?? 1;
+  const config = LEVEL_CONFIG[level] || LEVEL_CONFIG[1];
+
+  const [activeTab, setActiveTab] = useState('Active');
+  const [completedCount, setCompletedCount] = useState(0);
+  const [completedOffers, setCompletedOffers] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
-      if (authUser?.id) {
-        getUser(authUser.id).catch(() => {});
-      }
-    }, [])
+      loadData();
+    }, [authUser?.id])
   );
 
-  const levelConfig = profile ? LEVEL_CONFIG[profile.current_level] || LEVEL_CONFIG[1] : LEVEL_CONFIG[1];
-  const offer = OFFER_DETAILS[levelConfig.offerType] || OFFER_DETAILS.simple;
+  const loadData = async () => {
+    if (!authUser?.id) return;
+    setLoading(true);
+    try {
+      // Hero count from offer_history
+      const { count } = await supabase
+        .from('offer_history')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', authUser.id);
+      setCompletedCount(count ?? 0);
 
-  const handleStartOffer = () => {
-    setAdVisible(true);
+      // Completed offers list
+      const offers = await getOffers(authUser.id);
+      setCompletedOffers(offers || []);
+    } catch (e) {}
+    finally { setLoading(false); }
   };
 
-  const handleAdComplete = () => {
-    setAdVisible(false);
-    setAdDone(true);
-  };
-
-  const handleProceed = () => {
-    navigation.navigate('Verify');
-  };
+  const description =
+    level === 1
+      ? `Complete 3 quick steps to collect ${config.coinsAwarded} points instantly!`
+      : `Complete 5 steps after the ad to collect ${config.coinsAwarded} points instantly!`;
 
   return (
-    <LinearGradient colors={[C.bg, '#0A1628']} style={styles.container}>
-      <MockAdOverlay visible={adVisible} onAdComplete={handleAdComplete} />
-
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={C.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Special Offer</Text>
-        <View style={{ width: 40 }} />
+        <View style={styles.gemBadge}>
+          <Text style={styles.gemBadgeText}>💎</Text>
+        </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll}>
-        {/* Offer Card */}
-        <View style={[styles.offerCard, { borderColor: offer.color }]}>
-          <Text style={styles.offerIcon}>{offer.icon}</Text>
-          <Text style={styles.offerTitle}>{offer.title}</Text>
-          <Text style={styles.offerDesc}>{offer.description}</Text>
+      {/* Hero Section */}
+      <View style={styles.hero}>
+        {loading ? (
+          <ActivityIndicator color={C.white} />
+        ) : (
+          <>
+            <Text style={styles.heroCount}>{completedCount}</Text>
+            <Text style={styles.heroSub}>Activities Completed</Text>
+          </>
+        )}
+      </View>
 
-          <View style={styles.rewardBadge}>
-            <Text style={styles.rewardText}>🪙 {levelConfig.coinsAwarded} Coins Reward</Text>
-            <Text style={styles.rewardSub}>₹{(levelConfig.coinsAwarded / 80).toFixed(2)} value</Text>
-          </View>
+      {/* Tab Switcher */}
+      <View style={styles.tabRow}>
+        {['Active', 'Completed'].map(tab => (
+          <TouchableOpacity
+            key={tab}
+            style={[styles.tab, activeTab === tab && styles.tabActive]}
+            onPress={() => setActiveTab(tab)}
+          >
+            <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>{tab}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Content */}
+      {activeTab === 'Active' ? (
+        <View style={styles.activeContent}>
+          {/* Single offer card */}
+          <TouchableOpacity
+            style={styles.offerCard}
+            onPress={() => navigation.navigate('Verify', { level, coins_to_award: config.coinsAwarded })}
+            activeOpacity={0.88}
+          >
+            <View style={styles.offerLeft}>
+              <Text style={{ fontSize: 28 }}>🪙</Text>
+              <Text style={{ fontSize: 24 }}>🪙</Text>
+              <Text style={{ fontSize: 20 }}>✨</Text>
+            </View>
+            <View style={styles.offerRight}>
+              <Text style={styles.offerTitle}>Watch Ad</Text>
+              <Text style={styles.offerDesc}>{description}</Text>
+              <View style={styles.coinPill}>
+                <Text style={styles.coinPillText}>🪙 {config.coinsAwarded}</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+
+          <Text style={styles.levelNote}>
+            Level {level} · {config.offerType === 'simple' ? '3 steps' : '5 steps'}
+          </Text>
         </View>
-
-        {/* Steps */}
-        <Text style={styles.stepsTitle}>Offer Steps</Text>
-        <View style={styles.stepsCard}>
-          {offer.steps.map((step, idx) => (
-            <View key={step.id} style={styles.stepRow}>
-              <View style={[styles.stepNum, adDone && idx === 0 ? styles.stepDone : {}]}>
-                <Text style={styles.stepNumText}>
-                  {adDone && idx === 0 ? '✓' : step.id}
+      ) : (
+        <FlatList
+          data={completedOffers}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.flatContent}
+          ListEmptyComponent={
+            <View style={styles.emptyBox}>
+              <Text style={{ fontSize: 48 }}>🎁</Text>
+              <Text style={styles.emptyText}>No completed offers yet</Text>
+            </View>
+          }
+          renderItem={({ item }) => (
+            <View style={styles.histRow}>
+              <View style={styles.histIcon}>
+                <Text style={{ fontSize: 20 }}>🎁</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.histTitle}>Watch Ad</Text>
+                <Text style={styles.histDate}>
+                  {new Date(item.created_at).toLocaleDateString('en-IN')}
                 </Text>
               </View>
-              <View style={styles.stepInfo}>
-                <Text style={styles.stepIcon}>{step.icon}</Text>
-                <Text style={styles.stepText}>{step.text}</Text>
-              </View>
-              {adDone && idx === 0 && <Ionicons name="checkmark-circle" size={20} color={C.success} />}
+              <Text style={styles.histCoins}>+🪙{item.coins_awarded}</Text>
             </View>
-          ))}
+          )}
+        />
+      )}
+
+      {/* Fixed bottom streak banner */}
+      <LinearGradient
+        colors={['#E8175D', '#C01048']}
+        style={styles.streakBanner}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+      >
+        <View style={styles.streakBannerLeft}>
+          <Text style={styles.streakBannerTitle}>🏆 Days Streak</Text>
+          <Text style={styles.streakBannerSub}>Complete tasks and collect rewards</Text>
         </View>
-
-        {/* Action Button */}
-        {!adDone ? (
-          <TouchableOpacity
-            style={styles.startBtn}
-            onPress={handleStartOffer}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.startBtnText}>📺 Watch Ad to Start</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={styles.proceedBtn}
-            onPress={handleProceed}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.proceedBtnText}>➡️ Continue to Offer Steps</Text>
-          </TouchableOpacity>
-        )}
-
-        <Text style={styles.note}>
-          ⚠️ Complete all steps honestly to receive your coin reward.
-          Fraudulent completions will be disqualified.
-        </Text>
-      </ScrollView>
-    </LinearGradient>
+        <TouchableOpacity style={styles.streakPill} onPress={() => navigation.navigate('Streak')}>
+          <Text style={styles.streakPillText}>Get Start →</Text>
+        </TouchableOpacity>
+      </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: C.bg },
+
   header: {
     flexDirection: 'row', alignItems: 'center',
     justifyContent: 'space-between', paddingTop: 54,
@@ -151,53 +171,68 @@ const styles = StyleSheet.create({
   },
   backBtn: { width: 40, height: 40, justifyContent: 'center' },
   headerTitle: { color: C.white, fontSize: 18, fontWeight: 'bold' },
-  scroll: { padding: 20 },
+  gemBadge: { width: 40, alignItems: 'flex-end' },
+  gemBadgeText: { fontSize: 22 },
+
+  hero: { alignItems: 'center', marginTop: 20, marginBottom: 24 },
+  heroCount: { color: C.white, fontSize: 64, fontWeight: 'bold', lineHeight: 72 },
+  heroSub: { color: C.muted, fontSize: 14, marginTop: 4 },
+
+  tabRow: {
+    flexDirection: 'row', marginHorizontal: 16,
+    backgroundColor: C.surface, borderRadius: 12,
+    padding: 4, marginBottom: 16,
+  },
+  tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 8 },
+  tabActive: { backgroundColor: C.blue },
+  tabText: { color: C.muted, fontWeight: '600', fontSize: 14 },
+  tabTextActive: { color: C.white, fontWeight: 'bold' },
+
+  activeContent: { paddingHorizontal: 16 },
   offerCard: {
-    backgroundColor: C.surface, borderRadius: 20,
-    padding: 24, alignItems: 'center',
-    marginBottom: 24, borderWidth: 2,
+    flexDirection: 'row', backgroundColor: '#1A2035',
+    borderRadius: 14, padding: 20, alignItems: 'center',
   },
-  offerIcon: { fontSize: 48, marginBottom: 12 },
-  offerTitle: { color: C.white, fontSize: 22, fontWeight: 'bold', marginBottom: 8 },
-  offerDesc: { color: C.muted, fontSize: 14, textAlign: 'center', lineHeight: 20 },
-  rewardBadge: {
-    marginTop: 16, backgroundColor: '#1A2E1A',
-    borderRadius: 12, paddingHorizontal: 20, paddingVertical: 10,
-    borderWidth: 1, borderColor: C.gem, alignItems: 'center',
+  offerLeft: { flexDirection: 'row', alignItems: 'center', marginRight: 16 },
+  offerRight: { flex: 1 },
+  offerTitle: { color: C.white, fontWeight: 'bold', fontSize: 18, marginBottom: 4 },
+  offerDesc: { color: C.muted, fontSize: 13, lineHeight: 18 },
+  coinPill: {
+    alignSelf: 'flex-start', backgroundColor: '#2563EB',
+    borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6, marginTop: 8,
   },
-  rewardText: { color: C.gem, fontWeight: 'bold', fontSize: 16 },
-  rewardSub: { color: C.muted, fontSize: 12, marginTop: 2 },
-  stepsTitle: { color: C.white, fontSize: 17, fontWeight: 'bold', marginBottom: 12 },
-  stepsCard: {
-    backgroundColor: C.surface, borderRadius: 16,
-    padding: 16, marginBottom: 24,
-    borderWidth: 1, borderColor: C.border,
-  },
-  stepRow: {
+  coinPillText: { color: C.white, fontWeight: 'bold', fontSize: 14 },
+  levelNote: { color: C.disabled, fontSize: 12, marginTop: 10, textAlign: 'center' },
+
+  flatContent: { paddingHorizontal: 16, paddingBottom: 100 },
+  emptyBox: { alignItems: 'center', paddingTop: 40 },
+  emptyText: { color: C.muted, fontSize: 14, marginTop: 12 },
+
+  histRow: {
     flexDirection: 'row', alignItems: 'center',
-    paddingVertical: 12, borderBottomWidth: 1,
-    borderBottomColor: C.border,
+    backgroundColor: C.card, borderRadius: 10,
+    padding: 12, paddingHorizontal: 16, marginBottom: 6,
   },
-  stepNum: {
-    width: 30, height: 30, borderRadius: 15,
-    backgroundColor: C.border, justifyContent: 'center',
-    alignItems: 'center', marginRight: 12,
+  histIcon: {
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: '#2563EB', alignItems: 'center',
+    justifyContent: 'center', marginRight: 12,
   },
-  stepDone: { backgroundColor: C.success },
-  stepNumText: { color: C.white, fontWeight: 'bold', fontSize: 13 },
-  stepInfo: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-  stepIcon: { fontSize: 18, marginRight: 8 },
-  stepText: { color: C.white, fontSize: 14, flex: 1 },
-  startBtn: {
-    backgroundColor: C.primary, borderRadius: 14,
-    paddingVertical: 16, alignItems: 'center', marginBottom: 16,
+  histTitle: { color: C.white, fontWeight: 'bold', fontSize: 14 },
+  histDate: { color: C.muted, fontSize: 12, marginTop: 2 },
+  histCoins: { color: C.gem, fontWeight: 'bold', fontSize: 14 },
+
+  streakBanner: {
+    flexDirection: 'row', alignItems: 'center',
+    height: 70, paddingHorizontal: 16,
+    justifyContent: 'space-between',
   },
-  startBtnText: { color: C.white, fontWeight: 'bold', fontSize: 16 },
-  proceedBtn: {
-    backgroundColor: '#1A2A1A', borderRadius: 14,
-    paddingVertical: 16, alignItems: 'center',
-    marginBottom: 16, borderWidth: 2, borderColor: C.gem,
+  streakBannerLeft: { flex: 1 },
+  streakBannerTitle: { color: C.white, fontWeight: 'bold', fontSize: 14 },
+  streakBannerSub: { color: 'rgba(255,255,255,0.8)', fontSize: 11, marginTop: 2 },
+  streakPill: {
+    borderWidth: 1, borderColor: C.white,
+    borderRadius: 16, paddingHorizontal: 14, paddingVertical: 7,
   },
-  proceedBtnText: { color: C.gem, fontWeight: 'bold', fontSize: 16 },
-  note: { color: C.disabled, fontSize: 12, textAlign: 'center', lineHeight: 18 },
+  streakPillText: { color: C.white, fontWeight: 'bold', fontSize: 13 },
 });
