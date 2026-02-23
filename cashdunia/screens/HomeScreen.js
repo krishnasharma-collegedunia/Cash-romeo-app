@@ -288,7 +288,7 @@ export default function HomeScreen({ navigation }) {
           {/* HangAds */}
           <TouchableOpacity
             style={[styles.partnerCard, { backgroundColor: '#1A1A2E', width: 110, height: 130 }]}
-            onPress={() => Linking.openURL('https://hangmyads.com')}
+            onPress={() => Alert.alert('Coming Soon', 'Not currently available.')}
           >
             <Text style={styles.partnerHangAds1}>HANG</Text>
             <Text style={styles.partnerHangAds2}>ADS</Text>
@@ -298,7 +298,7 @@ export default function HomeScreen({ navigation }) {
           {/* Playtime – RECOMMENDED */}
           <TouchableOpacity
             style={[styles.partnerCard, { backgroundColor: '#F97316', width: 110, height: 145 }]}
-            onPress={() => navigation.navigate('Offers')}
+            onPress={() => Alert.alert('Coming Soon', 'Not currently available.')}
           >
             <View style={styles.recommendedBadge}>
               <Text style={styles.recommendedText}>Recommended</Text>
@@ -310,7 +310,7 @@ export default function HomeScreen({ navigation }) {
           {/* WannAds */}
           <TouchableOpacity
             style={[styles.partnerCard, { backgroundColor: '#1A1A2E', width: 110, height: 130 }]}
-            onPress={() => Linking.openURL('https://wannads.com')}
+            onPress={() => Alert.alert('Coming Soon', 'Not currently available.')}
           >
             <Text style={styles.partnerWannNN}>NN</Text>
             <Text style={styles.partnerWannWann}>WANNADS</Text>
