@@ -25,14 +25,14 @@
   },
   {
     "content": "7. screens/LeaderboardScreen.js — full rewrite (daily_coins, countdown, avatarColor)",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "8. screens/ProfileScreen.js — full rewrite",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "9. Rebuild web export + deploy",
-    "status": "pending"
+    "status": "in_progress"
   }
 ]
