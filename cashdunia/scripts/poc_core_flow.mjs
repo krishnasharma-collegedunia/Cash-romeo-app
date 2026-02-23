@@ -18,7 +18,7 @@ const LEVEL_CONFIG = {
   4: { gemTarget: 3, coinsAwarded: 250, offerType: 'install' }
 };
 
-const TEST_EMAIL = `poc_test_${Date.now()}@cashdunia.test`;
+const TEST_EMAIL = `poc_test_${Date.now()}@mailinator.com`;
 const TEST_PASS = 'TestPass1234!';
 
 let testUserId = null;
