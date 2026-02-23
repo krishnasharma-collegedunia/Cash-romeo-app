@@ -1,46 +1,38 @@
 [
   {
-    "content": "Phase 1: Create Expo project + install all dependencies",
-    "status": "completed"
+    "content": "1. constants/theme.js — add avatarColor",
+    "status": "in_progress"
   },
   {
-    "content": "Phase 1: POC - Supabase schema setup + core flow test script",
-    "status": "completed"
+    "content": "2. lib/api.js — fix getLeaderboard to use daily_coins",
+    "status": "pending"
   },
   {
-    "content": "Phase 2: Implement constants/theme.js + lib/supabase.js + lib/api.js",
-    "status": "completed"
+    "content": "3. screens/AuthScreen.js — full rewrite (auto-login, eye toggle, forgot pwd, referral, streak row)",
+    "status": "pending"
   },
   {
-    "content": "Phase 2: Implement Zustand stores (authStore, userStore, uiStore)",
-    "status": "completed"
+    "content": "4. screens/HomeScreen.js — partner cards Alert + Super Offers nav fix",
+    "status": "pending"
   },
   {
-    "content": "Phase 2: Implement navigation structure",
-    "status": "completed"
+    "content": "5. screens/SpecialOfferScreen.js — full rewrite (params, hero count, tabs, streak banner)",
+    "status": "pending"
   },
   {
-    "content": "Phase 2: Implement reusable components (MockAdOverlay, CoinAnimation, GemToast, SkeletonBox)",
-    "status": "completed"
+    "content": "6. screens/VerifyScreen.js — full rewrite (params, step circles, openOfferGate, success modal)",
+    "status": "pending"
   },
   {
-    "content": "Phase 2: Implement all screens (Auth, Home, Game, SpecialOffer, Verify, Streak, Withdrawal, Offers, Invite, Leaderboard, Profile)",
-    "status": "completed"
+    "content": "7. screens/LeaderboardScreen.js — full rewrite (daily_coins, countdown, avatarColor)",
+    "status": "pending"
   },
   {
-    "content": "Phase 2: Final App.js + babel config setup",
-    "status": "completed"
+    "content": "8. screens/ProfileScreen.js — full rewrite (gradient avatar, member since, settings, nav.reset)",
+    "status": "pending"
   },
   {
-    "content": "Phase 2: Verify project structure + syntax check",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 2: All user stories covered in development",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 2: Create project zip/archive for user delivery",
-    "status": "completed"
+    "content": "9. Rebuild web export + deploy",
+    "status": "pending"
   }
 ]
