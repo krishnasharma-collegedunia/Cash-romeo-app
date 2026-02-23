@@ -17,15 +17,15 @@
   },
   {
     "content": "5. screens/SpecialOfferScreen.js — full rewrite",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "6. screens/VerifyScreen.js — full rewrite",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "7. screens/LeaderboardScreen.js — full rewrite (daily_coins, countdown, avatarColor)",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "8. screens/ProfileScreen.js — full rewrite",
