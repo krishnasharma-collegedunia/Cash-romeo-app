@@ -29,5 +29,12 @@ export const LEVEL_CONFIG = {
 
 export const getNextLevel = (current) => (current >= 4 ? 1 : current + 1);
 
+export const avatarColor = (name = '') => {
+  const colors = ['#E8175D', '#4DA6FF', '#00C853', '#FFC947', '#B87CFF', '#FF6B35'];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + hash * 31;
+  return colors[Math.abs(hash) % colors.length];
+};
+
 export const COINS_PER_RUPEE = 80;
 export const WITHDRAWAL_MIN_COINS = 1200;
