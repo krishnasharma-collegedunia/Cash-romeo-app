@@ -1,6 +1,7 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
+import '@expo/metro-runtime';
+import React, { useEffect } from 'react';
+import { View, ActivityIndicator, StyleSheet, Text, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import {
   useFonts,
