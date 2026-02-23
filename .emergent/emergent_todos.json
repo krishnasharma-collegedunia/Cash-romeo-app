@@ -9,15 +9,15 @@
   },
   {
     "content": "3. screens/AuthScreen.js — full rewrite",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "4. screens/HomeScreen.js — partner cards Alert + Super Offers nav fix",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "5. screens/SpecialOfferScreen.js — full rewrite",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "6. screens/VerifyScreen.js — full rewrite",
