@@ -1,0 +1,38 @@
+[
+  {
+    "content": "Phase 1: Create Expo project + install all dependencies",
+    "status": "in_progress"
+  },
+  {
+    "content": "Phase 1: POC - Supabase schema setup + core flow test script",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: Implement constants/theme.js + lib/supabase.js + lib/api.js",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: Implement navigation structure",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: Implement reusable components (MockAdOverlay, CoinAnimation, GemToast, SkeletonBox)",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: Implement all screens (Auth, Home, Game, SpecialOffer, Verify, Streak, Withdrawal, Offers, Invite, Leaderboard, Profile)",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: Implement Zustand stores (authStore, userStore, uiStore)",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: Final App.js + babel config setup",
+    "status": "pending"
+  },
+  {
+    "content": "Phase 2: End-to-end testing + fix issues",
+    "status": "pending"
+  }
+]
