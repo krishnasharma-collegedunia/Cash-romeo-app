@@ -1,191 +1,165 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ScrollView,
+  View, Text, TouchableOpacity, StyleSheet, Alert,
+  ActivityIndicator, ScrollView, Modal, Animated,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { C, LEVEL_CONFIG, getNextLevel } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
 import { useUserStore } from '../store/userStore';
-import { getUser, insertOffer, advanceLevel, incrementCoins } from '../lib/api';
+import { getUser, insertOffer, advanceLevel, incrementCoins, openOfferGate } from '../lib/api';
 import CoinAnimation from '../components/CoinAnimation';
-import MockAdOverlay from '../components/MockAdOverlay';
 
-export default function VerifyScreen({ navigation }) {
+const STEPS = {
+  simple: [
+    { emoji: '🎮', text: 'Play the game — hit 4 moles to complete a round.' },
+    { emoji: '📺', text: 'Watch the short ad shown after gameplay.' },
+    { emoji: '📘', text: 'Tap Verify below to collect your 350 coins.' },
+  ],
+  install: (coinsAwarded) => [
+    { emoji: '🎮', text: 'Play the game — hit 4 moles to complete a round.' },
+    { emoji: '📺', text: 'Watch the short ad shown after gameplay.' },
+    { emoji: '📲', text: 'Install the app shown in the ad.' },
+    { emoji: '⏱', text: 'Use the installed app for at least 2 minutes.' },
+    { emoji: '📘', text: `Tap Verify below to collect your ${coinsAwarded} coins.` },
+  ],
+};
+
+export default function VerifyScreen({ route, navigation }) {
   const { user: authUser } = useAuthStore();
   const { profile, setProfile } = useUserStore();
-  const [checklist, setChecklist] = useState([]);
-  const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
+
+  const level = route?.params?.level ?? profile?.current_level ?? 1;
+  const coinsToAward = route?.params?.coins_to_award ?? (LEVEL_CONFIG[level]?.coinsAwarded ?? 350);
+  const config = LEVEL_CONFIG[level] || LEVEL_CONFIG[1];
+
+  const steps = config.offerType === 'simple'
+    ? STEPS.simple
+    : STEPS.install(coinsToAward);
+
+  const [loading, setLoading] = useState(false);
   const [showCoinAnim, setShowCoinAnim] = useState(false);
-  const [adVisible, setAdVisible] = useState(false);
-  const [adStepIndex, setAdStepIndex] = useState(-1);
+  const [successModal, setSuccessModal] = useState(null); // { coins, nextLevel }
 
-  useFocusEffect(
-    useCallback(() => {
-      if (profile) {
-        const levelConfig = LEVEL_CONFIG[profile.current_level] || LEVEL_CONFIG[1];
-        const steps = generateSteps(levelConfig);
-        setChecklist(steps.map(s => ({ ...s, checked: false })));
-        setSuccess(false);
-      }
-    }, [profile?.current_level])
-  );
+  const scaleAnim = useRef(new Animated.Value(0.3)).current;
 
-  const generateSteps = (levelConfig) => {
-    if (levelConfig.offerType === 'simple') {
-      return [
-        { id: 1, text: 'I watched the full advertisement' },
-        { id: 2, text: 'I completed the survey' },
-        { id: 3, text: 'My submission was genuine' },
-      ];
-    }
-    return [
-      { id: 1, text: 'I watched the advertisement' },
-      { id: 2, text: 'I downloaded the promoted app' },
-      { id: 3, text: 'I opened the app at least once' },
-      { id: 4, text: 'I completed the in-app tutorial' },
-      { id: 5, text: 'My completion was genuine' },
-    ];
-  };
-
-  const toggleItem = (id) => {
-    setChecklist(prev => prev.map(item =>
-      item.id === id ? { ...item, checked: !item.checked } : item
-    ));
-  };
-
-  const allChecked = checklist.length > 0 && checklist.every(i => i.checked);
-
-  const levelConfig = profile ? LEVEL_CONFIG[profile.current_level] || LEVEL_CONFIG[1] : LEVEL_CONFIG[1];
-
-  const handleSubmit = async () => {
-    if (!allChecked) {
-      Alert.alert('Incomplete', 'Please check all steps to confirm completion');
-      return;
-    }
-    setSubmitting(true);
+  const handleVerify = async () => {
+    setLoading(true);
     try {
-      const currentLevel = profile.current_level;
-      const config = LEVEL_CONFIG[currentLevel];
-      const next = getNextLevel(currentLevel);
+      await new Promise(r => setTimeout(r, 1500)); // simulate verification
 
-      // Award coins
-      await incrementCoins(authUser.id, config.coinsAwarded);
+      const nextLevel = getNextLevel(level);
 
-      // Record offer history
+      await incrementCoins(authUser.id, coinsToAward);
       await insertOffer({
         user_id: authUser.id,
-        level: currentLevel,
+        level,
         offer_type: config.offerType,
-        coins_awarded: config.coinsAwarded,
+        coins_awarded: coinsToAward,
       });
+      await openOfferGate(authUser.id);     // re-opens gate for next level's gems
+      await advanceLevel(authUser.id, nextLevel); // advance + reset gems + close gate
 
-      // Advance level
-      await advanceLevel(authUser.id, next);
-
-      // Reload profile
       const updated = await getUser(authUser.id);
       setProfile(updated);
 
+      // Show coin animation + success modal
       setShowCoinAnim(true);
-      setSuccess(true);
+      scaleAnim.setValue(0.3);
+      Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true }).start();
+      setSuccessModal({ coins: coinsToAward, nextLevel });
     } catch (e) {
-      Alert.alert('Error', e.message);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
-  if (success) {
-    return (
-      <LinearGradient colors={[C.bg, '#001A0A']} style={styles.container}>
-        <CoinAnimation visible={showCoinAnim} onDone={() => setShowCoinAnim(false)} />
-        <View style={styles.successContainer}>
-          <Text style={styles.successEmoji}>🎉</Text>
-          <Text style={styles.successTitle}>Offer Complete!</Text>
-          <Text style={styles.successCoins}>+{levelConfig.coinsAwarded} Coins Earned</Text>
-          <Text style={styles.successSub}>₹{(levelConfig.coinsAwarded / 80).toFixed(2)} added to your balance</Text>
-          <View style={styles.newLevelBadge}>
-            <Text style={styles.newLevelText}>
-              Now on Level {profile?.current_level ?? 1}
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={styles.doneBtn}
-            onPress={() => navigation.navigate('Home')}
-          >
-            <Text style={styles.doneBtnText}>Back to Home</Text>
-          </TouchableOpacity>
-        </View>
-      </LinearGradient>
-    );
-  }
-
   return (
-    <LinearGradient colors={[C.bg, '#0A1628']} style={styles.container}>
+    <View style={styles.container}>
+      <CoinAnimation visible={showCoinAnim} onDone={() => setShowCoinAnim(false)} />
+
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={C.white} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Verify Completion</Text>
+        <Text style={styles.headerTitle}>Collect Points</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={styles.rewardCard}>
-          <Text style={styles.rewardTitle}>Your Reward</Text>
-          <Text style={styles.rewardAmount}>{levelConfig.coinsAwarded} Coins</Text>
-          <Text style={styles.rewardRs}>₹{(levelConfig.coinsAwarded / 80).toFixed(2)}</Text>
-        </View>
+        <Text style={styles.howTitle}>How it works.</Text>
 
-        <Text style={styles.checkTitle}>Confirm you completed all steps:</Text>
+        {steps.map((step, idx) => (
+          <View key={idx} style={styles.stepRow}>
+            {/* Circle with emoji */}
+            <View style={styles.stepCircle}>
+              <Text style={styles.stepEmoji}>{step.emoji}</Text>
+            </View>
 
-        <View style={styles.checkCard}>
-          {checklist.map(item => (
-            <TouchableOpacity
-              key={item.id}
-              style={[styles.checkRow, item.checked && styles.checkRowDone]}
-              onPress={() => toggleItem(item.id)}
-              activeOpacity={0.7}
-            >
-              <View style={[styles.checkbox, item.checked && styles.checkboxDone]}>
-                {item.checked && <Ionicons name="checkmark" size={16} color={C.white} />}
+            {/* Step info */}
+            <View style={styles.stepInfo}>
+              <View style={styles.stepPill}>
+                <Text style={styles.stepPillText}>Step {idx + 1}</Text>
               </View>
-              <Text style={[styles.checkText, item.checked && styles.checkTextDone]}>
-                {item.text}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+              <Text style={styles.stepText}>{step.text}</Text>
+            </View>
+          </View>
+        ))}
 
+        <View style={{ height: 100 }} />
+      </ScrollView>
+
+      {/* Fixed bottom Verify button */}
+      <View style={styles.bottomBar}>
         <TouchableOpacity
-          style={[styles.submitBtn, (!allChecked || submitting) && styles.submitBtnDisabled]}
-          onPress={handleSubmit}
-          disabled={!allChecked || submitting}
+          style={[styles.verifyBtn, loading && styles.verifyBtnDisabled]}
+          onPress={handleVerify}
+          disabled={loading}
           activeOpacity={0.85}
         >
-          {submitting ? (
+          {loading ? (
             <ActivityIndicator color={C.white} />
           ) : (
-            <Text style={styles.submitBtnText}>
-              {allChecked ? '💰 Submit & Claim Coins' : 'Check all steps to continue'}
-            </Text>
+            <Text style={styles.verifyBtnText}>Verify (3)</Text>
           )}
         </TouchableOpacity>
+      </View>
 
-        <Text style={styles.disclaimer}>
-          By submitting, you confirm that your offer completion was genuine.
-          False claims will result in account suspension.
-        </Text>
-      </ScrollView>
-    </LinearGradient>
+      {/* Success Modal */}
+      <Modal visible={!!successModal} transparent animationType="fade">
+        <View style={styles.modalDim}>
+          <Animated.View style={[styles.successCard, { transform: [{ scale: scaleAnim }] }]}>
+            <Text style={styles.successCheck}>✅</Text>
+            <Text style={styles.successTitle}>Congratulations!</Text>
+            <Text style={styles.successCoins}>You earned {successModal?.coins} coins! 🪙</Text>
+            {successModal?.nextLevel === 1 ? (
+              <Text style={styles.successSub}>
+                🎉 You've completed all 4 levels! Starting again from Level 1.
+              </Text>
+            ) : (
+              <Text style={[styles.successSub, { color: C.gem }]}>
+                Level {successModal?.nextLevel} unlocked! Keep going 🚀
+              </Text>
+            )}
+            <TouchableOpacity
+              style={styles.awesomeBtn}
+              onPress={() => { setSuccessModal(null); navigation.navigate('Home'); }}
+            >
+              <Text style={styles.awesomeBtnText}>Awesome!</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: C.bg },
+
   header: {
     flexDirection: 'row', alignItems: 'center',
     justifyContent: 'space-between', paddingTop: 54,
@@ -193,57 +167,47 @@ const styles = StyleSheet.create({
   },
   backBtn: { width: 40, height: 40, justifyContent: 'center' },
   headerTitle: { color: C.white, fontSize: 18, fontWeight: 'bold' },
-  scroll: { padding: 20 },
-  rewardCard: {
-    backgroundColor: C.surface, borderRadius: 16,
-    padding: 20, alignItems: 'center',
-    marginBottom: 24, borderWidth: 2,
-    borderColor: C.gold,
+
+  scroll: { paddingHorizontal: 16, paddingTop: 8 },
+  howTitle: { color: C.white, fontWeight: 'bold', fontSize: 24, marginBottom: 24 },
+
+  stepRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16 },
+  stepCircle: {
+    width: 60, height: 60, borderRadius: 30,
+    backgroundColor: '#2563EB', alignItems: 'center',
+    justifyContent: 'center', marginRight: 14, flexShrink: 0,
   },
-  rewardTitle: { color: C.muted, fontSize: 14 },
-  rewardAmount: { color: C.gold, fontSize: 32, fontWeight: 'bold', marginTop: 4 },
-  rewardRs: { color: C.gem, fontSize: 18, marginTop: 2 },
-  checkTitle: { color: C.white, fontSize: 16, fontWeight: '600', marginBottom: 12 },
-  checkCard: {
-    backgroundColor: C.surface, borderRadius: 16,
-    padding: 16, marginBottom: 24,
-    borderWidth: 1, borderColor: C.border,
+  stepEmoji: { fontSize: 24 },
+  stepInfo: { flex: 1, paddingTop: 4 },
+  stepPill: {
+    alignSelf: 'flex-start', backgroundColor: '#2563EB',
+    borderRadius: 4, paddingHorizontal: 8, paddingVertical: 2, marginBottom: 4,
   },
-  checkRow: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingVertical: 14, borderBottomWidth: 1,
-    borderBottomColor: C.border,
+  stepPillText: { color: C.white, fontWeight: 'bold', fontSize: 9 },
+  stepText: { color: C.white, fontSize: 14, lineHeight: 21 },
+
+  bottomBar: { padding: 16, paddingBottom: 32 },
+  verifyBtn: {
+    backgroundColor: '#2563EB', borderRadius: 14,
+    height: 56, alignItems: 'center', justifyContent: 'center',
   },
-  checkRowDone: { opacity: 0.8 },
-  checkbox: {
-    width: 24, height: 24, borderRadius: 6,
-    borderWidth: 2, borderColor: C.muted,
-    marginRight: 14, justifyContent: 'center', alignItems: 'center',
+  verifyBtnDisabled: { opacity: 0.6 },
+  verifyBtnText: { color: C.white, fontWeight: 'bold', fontSize: 16 },
+
+  // Modal
+  modalDim: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 40 },
+  successCard: {
+    backgroundColor: C.white, borderRadius: 20,
+    padding: 32, width: '100%', alignItems: 'center',
   },
-  checkboxDone: { backgroundColor: C.success, borderColor: C.success },
-  checkText: { color: C.white, fontSize: 14, flex: 1, lineHeight: 20 },
-  checkTextDone: { color: C.muted, textDecorationLine: 'line-through' },
-  submitBtn: {
+  successCheck: { fontSize: 48 },
+  successTitle: { color: '#111', fontWeight: 'bold', fontSize: 22, marginTop: 12 },
+  successCoins: { color: '#C8860A', fontSize: 16, marginTop: 8 },
+  successSub: { color: C.muted, fontSize: 13, marginTop: 6, textAlign: 'center' },
+  awesomeBtn: {
     backgroundColor: C.primary, borderRadius: 14,
-    paddingVertical: 16, alignItems: 'center', marginBottom: 16,
+    height: 52, width: '100%', alignItems: 'center',
+    justifyContent: 'center', marginTop: 24,
   },
-  submitBtnDisabled: { backgroundColor: C.disabled },
-  submitBtnText: { color: C.white, fontWeight: 'bold', fontSize: 16 },
-  disclaimer: { color: C.disabled, fontSize: 12, textAlign: 'center', lineHeight: 18 },
-  successContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
-  successEmoji: { fontSize: 72, marginBottom: 16 },
-  successTitle: { color: C.white, fontSize: 28, fontWeight: 'bold', marginBottom: 8 },
-  successCoins: { color: C.gold, fontSize: 24, fontWeight: 'bold', marginBottom: 4 },
-  successSub: { color: C.gem, fontSize: 16, marginBottom: 24 },
-  newLevelBadge: {
-    backgroundColor: C.surface, borderRadius: 20,
-    paddingHorizontal: 24, paddingVertical: 10,
-    borderWidth: 1, borderColor: C.primary, marginBottom: 32,
-  },
-  newLevelText: { color: C.primary, fontWeight: 'bold', fontSize: 16 },
-  doneBtn: {
-    backgroundColor: C.primary, borderRadius: 14,
-    paddingVertical: 16, paddingHorizontal: 48,
-  },
-  doneBtnText: { color: C.white, fontWeight: 'bold', fontSize: 16 },
+  awesomeBtnText: { color: C.white, fontWeight: 'bold', fontSize: 16 },
 });
