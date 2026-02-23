@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  RefreshControl, Modal, Linking, ActivityIndicator,
+  RefreshControl, Modal, Alert, ActivityIndicator,
   TextInput, KeyboardAvoidingView, Platform, Animated,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
