@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
   // Header
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 54, paddingHorizontal: 20, paddingBottom: 12 },
   backBtn: { width: 40, height: 40, justifyContent: 'center' },
-  headerTitle: { color: C.white, fontSize: 18, fontWeight: 'bold' },
+  headerTitle: { color: C.white, fontSize: 18, fontWeight: 'bold', flex: 1, textAlign: 'center' },
   headerCoins: { color: C.gold, fontWeight: 'bold', fontSize: 15 },
 
   scroll: { padding: 16 },
