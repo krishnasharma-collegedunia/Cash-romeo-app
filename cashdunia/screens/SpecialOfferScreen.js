@@ -97,7 +97,7 @@ export default function SpecialOfferScreen({ route, navigation }) {
           {/* Single offer card */}
           <TouchableOpacity
             style={styles.offerCard}
-            onPress={() => navigation.navigate('Verify', { level, coins_to_award: config.coinsAwarded })}
+            onPress={handleStartOffer}
             activeOpacity={0.88}
           >
             <View style={styles.offerLeft}>
