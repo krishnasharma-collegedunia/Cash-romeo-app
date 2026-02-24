@@ -8,7 +8,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { C, LEVEL_CONFIG, getNextLevel } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
 import { useUserStore } from '../store/userStore';
-import { getUser, incrementGems, openOfferGate } from '../lib/api';
+import { getUser, incrementGems, openOfferGate, saveGameCompletionFlag } from '../lib/api';
 import GemToast from '../components/GemToast';
 import MockAdOverlay from '../components/MockAdOverlay';
 
