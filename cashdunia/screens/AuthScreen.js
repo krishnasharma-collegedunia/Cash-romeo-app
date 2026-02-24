@@ -86,10 +86,19 @@ export default function AuthScreen({ navigation }) {
 
   const handleGoogleLogin = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+      // Build redirectTo so Google sends the token back to THIS page
+      const redirectTo =
+        Platform.OS === 'web' && typeof window !== 'undefined'
+          ? window.location.origin + window.location.pathname
+          : undefined;
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo },
+      });
       if (error) throw new Error(error.message);
     } catch (e) {
-      Alert.alert('Error', e.message);
+      Alert.alert('Google Login Error', e.message);
     }
   };
 
