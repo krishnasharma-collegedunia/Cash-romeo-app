@@ -15,7 +15,7 @@ import SkeletonBox from '../components/SkeletonBox';
 
 export default function ProfileScreen({ navigation }) {
   const { user: authUser } = useAuthStore();
-  const { profile, setProfile } = useUserStore();
+  const { profile, setProfile, clearProfile } = useUserStore();
 
   const [offerCount, setOfferCount] = useState(0);
   const [referralCount, setReferralCount] = useState(0);
