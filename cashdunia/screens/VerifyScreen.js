@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, Alert,
   ActivityIndicator, ScrollView, Modal, Animated,
@@ -33,19 +33,47 @@ export default function VerifyScreen({ route, navigation }) {
   const level = route?.params?.level ?? profile?.current_level ?? 1;
   const coinsToAward = route?.params?.coins_to_award ?? (LEVEL_CONFIG[level]?.coinsAwarded ?? 350);
   const config = LEVEL_CONFIG[level] || LEVEL_CONFIG[1];
-
   const steps = config.offerType === 'simple' ? STEPS.simple : STEPS.install;
 
   const [loading, setLoading] = useState(false);
   const [showCoinAnim, setShowCoinAnim] = useState(false);
   const [successModal, setSuccessModal] = useState(null); // { coins, nextLevel }
 
+  // ── gameDone gate ─────────────────────────────────────────────────
+  // First focus = opened from SpecialOfferScreen → game not done yet.
+  // Second+ focus = returning from GameScreen after completing game+ad → game done.
+  const [gameDone, setGameDone] = useState(false);
+  const focusCountRef = useRef(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      focusCountRef.current += 1;
+      if (focusCountRef.current > 1) {
+        setGameDone(true);
+      }
+    }, [])
+  );
+
   const scaleAnim = useRef(new Animated.Value(0.3)).current;
 
+  // ── Play Game button ──────────────────────────────────────────────
+  const handlePlayGame = () => {
+    navigation.navigate('Game', {
+      fromOffer: true,
+      level,
+      coinsToAward,
+    });
+  };
+
+  // ── Verify (awards coins) ─────────────────────────────────────────
   const handleVerify = async () => {
+    if (!gameDone) {
+      Alert.alert('Play First', 'Please tap Play Game and complete the game + ad before verifying.');
+      return;
+    }
     setLoading(true);
     try {
-      await new Promise(r => setTimeout(r, 1500)); // simulate verification
+      await new Promise(r => setTimeout(r, 1500));
 
       const nextLevel = getNextLevel(level);
 
@@ -56,13 +84,12 @@ export default function VerifyScreen({ route, navigation }) {
         offer_type: config.offerType,
         coins_awarded: coinsToAward,
       });
-      await openOfferGate(authUser.id);     // re-opens gate for next level's gems
-      await advanceLevel(authUser.id, nextLevel); // advance + reset gems + close gate
+      await openOfferGate(authUser.id);
+      await advanceLevel(authUser.id, nextLevel);
 
       const updated = await getUser(authUser.id);
       setProfile(updated);
 
-      // Show coin animation + success modal
       setShowCoinAnim(true);
       scaleAnim.setValue(0.3);
       Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true }).start();
@@ -88,16 +115,34 @@ export default function VerifyScreen({ route, navigation }) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
+        {/* ── PLAY GAME BUTTON (Step 1 CTA) ── */}
+        <TouchableOpacity
+          style={[styles.playGameBtn, gameDone && styles.playGameBtnDone]}
+          onPress={handlePlayGame}
+          disabled={gameDone}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.playGameBtnText}>
+            {gameDone ? '✅  Game Completed!' : '🎮  Play Game'}
+          </Text>
+        </TouchableOpacity>
+
+        {!gameDone && (
+          <Text style={styles.playHint}>Complete the game + ad first, then tap Verify below.</Text>
+        )}
+
         <Text style={styles.howTitle}>How it works.</Text>
 
         {steps.map((step, idx) => (
           <View key={idx} style={styles.stepRow}>
-            {/* Circle with emoji */}
-            <View style={styles.stepCircle}>
+            {/* Circle — filled once game done for step 1 & 2 */}
+            <View style={[
+              styles.stepCircle,
+              gameDone && idx < 2 && { backgroundColor: C.gem },
+            ]}>
               <Text style={styles.stepEmoji}>{step.emoji}</Text>
             </View>
 
-            {/* Step info */}
             <View style={styles.stepInfo}>
               <View style={styles.stepPill}>
                 <Text style={styles.stepPillText}>Step {idx + 1}</Text>
@@ -110,18 +155,20 @@ export default function VerifyScreen({ route, navigation }) {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* Fixed bottom Verify button */}
+      {/* Fixed bottom Verify button — gated on gameDone */}
       <View style={styles.bottomBar}>
         <TouchableOpacity
-          style={[styles.verifyBtn, loading && styles.verifyBtnDisabled]}
+          style={[styles.verifyBtn, (!gameDone || loading) && styles.verifyBtnDisabled]}
           onPress={handleVerify}
-          disabled={loading}
+          disabled={!gameDone || loading}
           activeOpacity={0.85}
         >
           {loading ? (
             <ActivityIndicator color={C.white} />
           ) : (
-            <Text style={styles.verifyBtnText}>Verify (3)</Text>
+            <Text style={styles.verifyBtnText}>
+              {gameDone ? 'Verify & Collect Coins' : 'Play Game First ↑'}
+            </Text>
           )}
         </TouchableOpacity>
       </View>
@@ -166,8 +213,19 @@ const styles = StyleSheet.create({
   backBtn: { width: 40, height: 40, justifyContent: 'center' },
   headerTitle: { color: C.white, fontSize: 18, fontWeight: 'bold' },
 
-  scroll: { paddingHorizontal: 16, paddingTop: 8 },
-  howTitle: { color: C.white, fontWeight: 'bold', fontSize: 24, marginBottom: 24 },
+  scroll: { paddingHorizontal: 16, paddingTop: 12 },
+
+  // Play Game button
+  playGameBtn: {
+    backgroundColor: '#16A34A', borderRadius: 14,
+    height: 56, alignItems: 'center', justifyContent: 'center',
+    marginBottom: 8,
+  },
+  playGameBtnDone: { backgroundColor: '#166534' },
+  playGameBtnText: { color: C.white, fontWeight: 'bold', fontSize: 17 },
+  playHint: { color: C.muted, fontSize: 12, textAlign: 'center', marginBottom: 20 },
+
+  howTitle: { color: C.white, fontWeight: 'bold', fontSize: 24, marginBottom: 20, marginTop: 8 },
 
   stepRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16 },
   stepCircle: {
@@ -189,7 +247,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563EB', borderRadius: 14,
     height: 56, alignItems: 'center', justifyContent: 'center',
   },
-  verifyBtnDisabled: { opacity: 0.6 },
+  verifyBtnDisabled: { backgroundColor: C.disabled },
   verifyBtnText: { color: C.white, fontWeight: 'bold', fontSize: 16 },
 
   // Modal
