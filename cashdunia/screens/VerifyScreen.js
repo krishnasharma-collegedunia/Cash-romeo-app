@@ -162,9 +162,9 @@ export default function VerifyScreen({ route, navigation }) {
       {/* Fixed bottom Verify button — gated on gameDone */}
       <View style={styles.bottomBar}>
         <TouchableOpacity
-          style={[styles.verifyBtn, (!gameDone || loading) && styles.verifyBtnDisabled]}
+          style={[styles.verifyBtn, (!hasCompletedGame || loading) && styles.verifyBtnDisabled]}
           onPress={handleVerify}
-          disabled={!gameDone || loading}
+          disabled={!hasCompletedGame || loading}
           activeOpacity={0.85}
         >
           {loading ? (
