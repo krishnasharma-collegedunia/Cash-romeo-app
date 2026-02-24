@@ -201,6 +201,17 @@ export default function GameScreen({ route, navigation }) {
   };
 
   // ── AD / GEM SEQUENCE ─────────────────────────────────────────────
+  // Called when fromOffer ad completes → navigate to VerifyScreen
+  const handleFromOfferAdComplete = () => {
+    setFromOfferAdVisible(false);
+    setCorrectCount(0);
+    setQuestion(generateQuestion());
+    navigation.navigate('Verify', {
+      level: offerLevel,
+      coins_to_award: coinsToAward,
+    });
+  };
+
   const startAdSequence = () => {
     setGameComplete(false);
     if (gemsBlocked) {
