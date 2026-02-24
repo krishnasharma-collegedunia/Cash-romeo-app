@@ -40,16 +40,19 @@ export default function VerifyScreen({ route, navigation }) {
   const [successModal, setSuccessModal] = useState(null); // { coins, nextLevel }
 
   // ── gameDone gate ─────────────────────────────────────────────────
-  // First focus = opened from SpecialOfferScreen → game not done yet.
-  // Second+ focus = returning from GameScreen after completing game+ad → game done.
-  const [gameDone, setGameDone] = useState(false);
-  const focusCountRef = useRef(0);
+  // hasInitiatedGameRef is set TRUE only when user taps "Play Game".
+  // When screen is focused again (returning from GameScreen), useFocusEffect
+  // sees the flag is set → marks hasCompletedGame = true → enables Verify button.
+  // This is robust: back-nav without playing will NOT enable the button.
+  const [hasCompletedGame, setHasCompletedGame] = useState(false);
+  const hasInitiatedGameRef = useRef(false);
 
   useFocusEffect(
     useCallback(() => {
-      focusCountRef.current += 1;
-      if (focusCountRef.current > 1) {
-        setGameDone(true);
+      if (hasInitiatedGameRef.current) {
+        // Returning after tapping Play Game (game + ad completed)
+        setHasCompletedGame(true);
+        hasInitiatedGameRef.current = false; // reset so re-play works
       }
     }, [])
   );
