@@ -330,9 +330,18 @@ export default function GameScreen({ route, navigation }) {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backBtn}
-          onPress={() => navigation.goBack()}
+          onPress={() => {
+            Alert.alert(
+              'Exit Game?',
+              'Your progress will be saved.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Exit', style: 'destructive', onPress: () => navigation.navigate('Home') },
+              ]
+            );
+          }}
         >
-          <Text style={styles.backText}>{'<'}</Text>
+          <Text style={styles.backText}>✕</Text>
         </TouchableOpacity>
 
         {/* Level progress */}
