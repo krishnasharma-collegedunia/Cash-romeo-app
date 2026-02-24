@@ -53,15 +53,16 @@ export default function ProfileScreen({ navigation }) {
   };
 
   const handleLogout = () => {
-    Alert.alert('Log Out', 'Are you sure?', [
+    Alert.alert('Log out?', 'Are you sure you want to log out?', [
       { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Log Out',
+        text: 'OK',
         style: 'destructive',
         onPress: async () => {
           setLoggingOut(true);
           try {
-            await supabase.auth.signOut();
+            clearProfile();                  // clear local user state
+            await supabase.auth.signOut();   // clears session + fires onAuthStateChange → session=null
             navigation.reset({ index: 0, routes: [{ name: 'Auth' }] });
           } catch (e) {
             Alert.alert('Error', e.message);
