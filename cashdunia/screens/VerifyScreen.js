@@ -121,17 +121,17 @@ export default function VerifyScreen({ route, navigation }) {
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* ── PLAY GAME BUTTON (Step 1 CTA) ── */}
         <TouchableOpacity
-          style={[styles.playGameBtn, gameDone && styles.playGameBtnDone]}
+          style={[styles.playGameBtn, hasCompletedGame && styles.playGameBtnDone]}
           onPress={handlePlayGame}
-          disabled={gameDone}
+          disabled={hasCompletedGame}
           activeOpacity={0.85}
         >
           <Text style={styles.playGameBtnText}>
-            {gameDone ? '✅  Game Completed!' : '🎮  Play Game'}
+            {hasCompletedGame ? '✅  Game Completed!' : '🎮  Play Game'}
           </Text>
         </TouchableOpacity>
 
-        {!gameDone && (
+        {!hasCompletedGame && (
           <Text style={styles.playHint}>Complete the game + ad first, then tap Verify below.</Text>
         )}
 
