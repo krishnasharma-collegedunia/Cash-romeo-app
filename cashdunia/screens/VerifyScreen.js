@@ -49,12 +49,21 @@ export default function VerifyScreen({ route, navigation }) {
 
   useFocusEffect(
     useCallback(() => {
-      if (hasInitiatedGameRef.current) {
-        // Returning after tapping Play Game (game + ad completed)
-        setHasCompletedGame(true);
-        hasInitiatedGameRef.current = false; // reset so re-play works
-      }
-    }, [])
+      const checkCompletion = async () => {
+        // 1. In-memory check: did user tap "Play Game" this session?
+        if (hasInitiatedGameRef.current) {
+          setHasCompletedGame(true);
+          hasInitiatedGameRef.current = false;
+          return;
+        }
+        // 2. Persistence check: completed in a previous navigation (exited after ad)
+        if (authUser?.id) {
+          const persisted = await checkGameCompletionFlag(authUser.id, level);
+          if (persisted) setHasCompletedGame(true);
+        }
+      };
+      checkCompletion();
+    }, [authUser?.id, level])
   );
 
   const scaleAnim = useRef(new Animated.Value(0.3)).current;
