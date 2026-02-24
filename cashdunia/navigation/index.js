@@ -70,14 +70,18 @@ function MainTabs() {
   );
 }
 
-export default function AppNavigator({ isAuthenticated }) {
+export default function AppNavigator({ isAuthenticated, oauthError }) {
   return (
     <NavigationContainer>
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <RootStack.Screen name="MainTabs" component={MainTabs} />
         ) : (
-          <RootStack.Screen name="Auth" component={AuthScreen} />
+          <RootStack.Screen
+            name="Auth"
+            component={AuthScreen}
+            initialParams={{ oauthError }}
+          />
         )}
       </RootStack.Navigator>
     </NavigationContainer>
