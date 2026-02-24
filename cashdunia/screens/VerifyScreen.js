@@ -13,16 +13,16 @@ import CoinAnimation from '../components/CoinAnimation';
 
 const STEPS = {
   simple: [
-    { emoji: '🎮', text: 'Play the game — hit 4 moles to complete a round.' },
-    { emoji: '📺', text: 'Watch the short ad shown after gameplay.' },
-    { emoji: '📘', text: 'Tap Verify below to collect your 350 coins.' },
+    { emoji: '🎮', text: 'Play the game' },
+    { emoji: '📺', text: 'Watch the ad shown after gameplay' },
+    { emoji: '🔘', text: 'Tap Verify below to collect your coins' },
   ],
-  install: (coinsAwarded) => [
-    { emoji: '🎮', text: 'Play the game — hit 4 moles to complete a round.' },
-    { emoji: '📺', text: 'Watch the short ad shown after gameplay.' },
-    { emoji: '📲', text: 'Install the app shown in the ad.' },
-    { emoji: '⏱', text: 'Use the installed app for at least 2 minutes.' },
-    { emoji: '📘', text: `Tap Verify below to collect your ${coinsAwarded} coins.` },
+  install: [
+    { emoji: '🎮', text: 'Play the game' },
+    { emoji: '📺', text: 'Watch the ad shown after gameplay' },
+    { emoji: '📲', text: 'Install the app shown in the ad' },
+    { emoji: '⏱', text: 'Use the installed app for at least 2 minutes' },
+    { emoji: '🔘', text: 'Tap Verify below to collect your coins' },
   ],
 };
 
