@@ -278,7 +278,7 @@ export default function HomeScreen({ navigation }) {
             </View>
             <View style={styles.actionCardBottom}>
               <Text style={styles.actionCardTitle}>Play Quiz</Text>
-              <Text style={styles.actionCardSubMuted}>Tap the moles!</Text>
+              <Text style={styles.actionCardSubMuted}>Earn Gems!</Text>
             </View>
           </TouchableOpacity>
         </View>
