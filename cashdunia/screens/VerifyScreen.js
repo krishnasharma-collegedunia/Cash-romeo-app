@@ -171,7 +171,7 @@ export default function VerifyScreen({ route, navigation }) {
             <ActivityIndicator color={C.white} />
           ) : (
             <Text style={styles.verifyBtnText}>
-              {gameDone ? 'Verify & Collect Coins' : 'Play Game First ↑'}
+              {hasCompletedGame ? 'Verify ✓' : 'Play Game First ↑'}
             </Text>
           )}
         </TouchableOpacity>
