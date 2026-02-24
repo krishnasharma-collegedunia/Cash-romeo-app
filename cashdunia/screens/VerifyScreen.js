@@ -34,9 +34,7 @@ export default function VerifyScreen({ route, navigation }) {
   const coinsToAward = route?.params?.coins_to_award ?? (LEVEL_CONFIG[level]?.coinsAwarded ?? 350);
   const config = LEVEL_CONFIG[level] || LEVEL_CONFIG[1];
 
-  const steps = config.offerType === 'simple'
-    ? STEPS.simple
-    : STEPS.install(coinsToAward);
+  const steps = config.offerType === 'simple' ? STEPS.simple : STEPS.install;
 
   const [loading, setLoading] = useState(false);
   const [showCoinAnim, setShowCoinAnim] = useState(false);
