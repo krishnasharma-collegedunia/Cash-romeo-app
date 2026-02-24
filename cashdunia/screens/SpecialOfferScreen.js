@@ -46,8 +46,12 @@ export default function SpecialOfferScreen({ route, navigation }) {
 
   const description =
     level === 1
-      ? `Complete 3 quick steps to collect ${config.coinsAwarded} points instantly!`
-      : `Complete 5 steps after the ad to collect ${config.coinsAwarded} points instantly!`;
+      ? `Play the game, watch an ad, then tap Verify to collect ${config.coinsAwarded} coins!`
+      : `Play the game, watch an ad, install the app, then tap Verify to collect ${config.coinsAwarded} coins!`;
+
+  const handleStartOffer = () => {
+    navigation.navigate('Verify', { level, coins_to_award: config.coinsAwarded });
+  };
 
   return (
     <View style={styles.container}>
