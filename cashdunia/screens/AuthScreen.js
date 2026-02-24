@@ -179,6 +179,12 @@ export default function AuthScreen({ navigation, route }) {
   // ── RENDER ────────────────────────────────────────────────────────
   return (
     <LinearGradient colors={[C.bg, '#0D1B2A']} style={styles.container}>
+      {/* OAuth error banner (e.g. Google login denied) */}
+      {oauthError && (
+        <View style={styles.oauthErrorBanner}>
+          <Text style={styles.oauthErrorText}>⚠️ Login failed: {oauthError}</Text>
+        </View>
+      )}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
