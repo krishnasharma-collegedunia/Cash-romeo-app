@@ -90,6 +90,8 @@ export default function GameScreen({ route, navigation }) {
   const [adPlaying, setAdPlaying] = useState(false);
   const [showBlock, setShowBlock] = useState(false);
   const [gemToastVis, setGemToastVis] = useState(false);
+  // fromOffer: separate ad overlay for the offer flow (no gem, navigates to Verify)
+  const [fromOfferAdVisible, setFromOfferAdVisible] = useState(false);
 
   // Progress bar anim
   const progressAnim = useRef(new Animated.Value(0)).current;
