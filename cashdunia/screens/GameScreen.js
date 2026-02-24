@@ -169,8 +169,13 @@ export default function GameScreen({ route, navigation }) {
       flashTimerRef.current = setTimeout(() => {
         setFlash(null);
         if (newCount >= CORRECT_TO_WIN) {
-          // Round complete!
-          setGameComplete(true);
+          if (fromOffer) {
+            // fromOffer mode: skip gem modal, show 10s ad then navigate to Verify
+            setFromOfferAdVisible(true);
+          } else {
+            // Normal mode: show complete modal → claim gem
+            setGameComplete(true);
+          }
           setAnswerLocked(false);
         } else {
           setQuestion(generateQuestion());
