@@ -136,7 +136,7 @@ export default function WithdrawalScreen({ navigation }) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={C.white} />
+          <Ionicons name="arrow-back" size={28} color={C.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Withdraw</Text>
         <Text style={styles.headerCoins}>{currentCoins} 🪙</Text>
