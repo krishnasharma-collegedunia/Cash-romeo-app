@@ -142,7 +142,7 @@ export default function VerifyScreen({ route, navigation }) {
             {/* Circle — filled once game done for step 1 & 2 */}
             <View style={[
               styles.stepCircle,
-              gameDone && idx < 2 && { backgroundColor: C.gem },
+              hasCompletedGame && idx < 2 && { backgroundColor: C.gem },
             ]}>
               <Text style={styles.stepEmoji}>{step.emoji}</Text>
             </View>
