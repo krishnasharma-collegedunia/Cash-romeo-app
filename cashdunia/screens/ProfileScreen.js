@@ -54,19 +54,28 @@ export default function ProfileScreen({ navigation }) {
   };
 
   const handleLogout = () => {
-    Alert.alert('Log out?', 'Are you sure you want to log out?', [
+    Alert.alert('Log Out', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
       {
-        text: 'OK',
+        text: 'Log Out',
         style: 'destructive',
         onPress: async () => {
           setLoggingOut(true);
           try {
-            clearProfile();                  // clear local user state
-            await supabase.auth.signOut();   // clears session + fires onAuthStateChange → session=null
+            clearProfile();
+            // Global signOut invalidates all sessions (prevents auto-relogin)
+            await supabase.auth.signOut({ scope: 'global' });
+            // Belt-and-suspenders: wipe AsyncStorage tokens directly
+            await AsyncStorage.multiRemove([
+              'supabase.auth.token',
+              'supabase.auth.refreshToken',
+              'sb-qhjcmyszufmbcvdpsdjk-auth-token',
+            ]);
+            await AsyncStorage.clear();
             navigation.reset({ index: 0, routes: [{ name: 'Auth' }] });
-          } catch (e) {
-            Alert.alert('Error', e.message);
+          } catch (err) {
+            console.error('Logout error:', err);
+            Alert.alert('Error', 'Logout failed.');
           } finally {
             setLoggingOut(false);
           }
