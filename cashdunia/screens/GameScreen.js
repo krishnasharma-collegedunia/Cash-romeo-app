@@ -284,6 +284,8 @@ export default function GameScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       <MockAdOverlay visible={adVisible} onAdComplete={awardGem} />
+      {/* fromOffer ad: 10s wait → navigate to VerifyScreen (no gem awarded) */}
+      <MockAdOverlay visible={fromOfferAdVisible} onAdComplete={handleFromOfferAdComplete} />
       <GemToast visible={gemToastVis} amount={1} />
 
       {/* ── Gem-blocked red banner ── */}
