@@ -11,7 +11,8 @@ import { supabase } from '../lib/supabase';
 
 const isValidEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
-export default function AuthScreen({ navigation }) {
+export default function AuthScreen({ navigation, route }) {
+  const oauthError = route?.params?.oauthError ?? null;
   const [mode, setMode] = useState('login');
   const [ready, setReady] = useState(false);
 
