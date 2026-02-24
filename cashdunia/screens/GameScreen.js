@@ -65,9 +65,12 @@ function Star({ filled }) {
   );
 }
 
-export default function GameScreen({ navigation }) {
+export default function GameScreen({ route, navigation }) {
   const { user: authUser } = useAuthStore();
   const { profile, setProfile } = useUserStore();
+
+  // fromOffer mode: skip gem, go straight to VerifyScreen after ad
+  const { fromOffer = false, level: offerLevel, coinsToAward } = route?.params || {};
 
   // Profile / level state
   const [currentLevel, setCurrentLevel] = useState(1);
