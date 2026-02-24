@@ -309,3 +309,28 @@ export const getReferralCount = async (uid) => {
     return 0;
   }
 };
+
+// ─── SPECIAL OFFER GAME COMPLETION FLAGS (AsyncStorage) ───────────
+// Persist completion across navigation so Verify button unlocks even
+// if user exits and re-enters VerifyScreen after finishing the game+ad.
+// Only used in the Special Offer flow — never in normal gem collection.
+
+export const saveGameCompletionFlag = async (userId, level) => {
+  try {
+    await AsyncStorage.setItem(`offer_game_done_L${level}_U${userId}`, 'true');
+  } catch (e) { /* non-fatal */ }
+};
+
+export const checkGameCompletionFlag = async (userId, level) => {
+  try {
+    return (await AsyncStorage.getItem(`offer_game_done_L${level}_U${userId}`)) === 'true';
+  } catch (e) {
+    return false;
+  }
+};
+
+export const clearGameCompletionFlag = async (userId, level) => {
+  try {
+    await AsyncStorage.removeItem(`offer_game_done_L${level}_U${userId}`);
+  } catch (e) { /* non-fatal */ }
+};
