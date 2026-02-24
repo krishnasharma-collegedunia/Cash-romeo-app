@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ─── AUTH ───────────────────────────────────────────────────────
 export const signUp = async (email, password, name) => {
