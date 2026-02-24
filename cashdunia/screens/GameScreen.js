@@ -201,15 +201,29 @@ export default function GameScreen({ route, navigation }) {
   };
 
   // ── AD / GEM SEQUENCE ─────────────────────────────────────────────
-  // Called when fromOffer ad completes → navigate to VerifyScreen
-  const handleFromOfferAdComplete = () => {
+  // Called when fromOffer ad completes → save flag + navigate to VerifyScreen.
+  // This is ONLY for the Special Offer flow (fromOffer === true).
+  // Normal gem collection uses awardGem() via the other MockAdOverlay.
+  const handleFromOfferAdComplete = async () => {
     setFromOfferAdVisible(false);
-    setCorrectCount(0);
-    setQuestion(generateQuestion());
+
+    // Save completion flag so VerifyScreen unlocks even if user exits and returns
+    if (authUser?.id) {
+      const targetLevel = offerLevel ?? currentLevel;
+      await saveGameCompletionFlag(authUser.id, targetLevel);
+    }
+
+    // Navigate FIRST to avoid "game restart" flash caused by state resets
     navigation.navigate('Verify', {
-      level: offerLevel,
-      coins_to_award: coinsToAward,
+      level: offerLevel ?? currentLevel,
+      coins_to_award: coinsToAward ?? (LEVEL_CONFIG[currentLevel] || LEVEL_CONFIG[1]).coinsAwarded,
     });
+
+    // Reset game state AFTER navigation so board looks fresh if user returns
+    setTimeout(() => {
+      setCorrectCount(0);
+      setQuestion(generateQuestion());
+    }, 200);
   };
 
   const startAdSequence = () => {
