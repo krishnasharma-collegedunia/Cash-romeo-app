@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { C, LEVEL_CONFIG, getNextLevel } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
 import { useUserStore } from '../store/userStore';
-import { getUser, insertOffer, advanceLevel, incrementCoins, openOfferGate } from '../lib/api';
+import { getUser, insertOffer, advanceLevel, incrementCoins, openOfferGate, checkGameCompletionFlag, clearGameCompletionFlag } from '../lib/api';
 import CoinAnimation from '../components/CoinAnimation';
 
 const STEPS = {
