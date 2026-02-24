@@ -448,4 +448,9 @@ const styles = StyleSheet.create({
   switchLink: { color: C.primary, fontWeight: '600' },
 
   footer: { textAlign: 'center', color: C.disabled, fontSize: 12, marginTop: 20, lineHeight: 18 },
+
+  oauthErrorBanner: {
+    backgroundColor: C.error, paddingVertical: 10, paddingHorizontal: 16,
+  },
+  oauthErrorText: { color: C.white, fontWeight: 'bold', fontSize: 13, textAlign: 'center' },
 });
