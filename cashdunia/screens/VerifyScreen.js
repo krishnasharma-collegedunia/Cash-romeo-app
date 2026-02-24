@@ -100,6 +100,11 @@ export default function VerifyScreen({ route, navigation }) {
       await openOfferGate(authUser.id);
       await advanceLevel(authUser.id, nextLevel);
 
+      // Clear the completion flag now that coins have been awarded
+      if (authUser?.id) {
+        await clearGameCompletionFlag(authUser.id, level);
+      }
+
       const updated = await getUser(authUser.id);
       setProfile(updated);
 
