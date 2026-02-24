@@ -390,6 +390,9 @@ export default function HomeScreen({ navigation }) {
 
               {/* Header */}
               <View style={styles.redeemHeader}>
+                <TouchableOpacity onPress={() => setRedeemVisible(false)} style={{ padding: 4 }}>
+                  <Text style={{ fontSize: 22, color: C.white, fontWeight: 'bold' }}>←</Text>
+                </TouchableOpacity>
                 <Text style={styles.redeemTitle}>Redeem Coins</Text>
                 <Text style={styles.redeemCountry}>🇮🇳 India</Text>
               </View>
