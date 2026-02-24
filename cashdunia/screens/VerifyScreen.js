@@ -61,6 +61,7 @@ export default function VerifyScreen({ route, navigation }) {
 
   // ── Play Game button ──────────────────────────────────────────────
   const handlePlayGame = () => {
+    hasInitiatedGameRef.current = true; // mark that we intentionally left for game
     navigation.navigate('Game', {
       fromOffer: true,
       level,
@@ -70,7 +71,7 @@ export default function VerifyScreen({ route, navigation }) {
 
   // ── Verify (awards coins) ─────────────────────────────────────────
   const handleVerify = async () => {
-    if (!gameDone) {
+    if (!hasCompletedGame) {
       Alert.alert('Play First', 'Please tap Play Game and complete the game + ad before verifying.');
       return;
     }
