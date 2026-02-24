@@ -55,34 +55,42 @@ export default function ProfileScreen({ navigation }) {
   };
 
   const handleLogout = () => {
-    Alert.alert('Log Out', 'Are you sure?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Log Out',
-        style: 'destructive',
-        onPress: async () => {
-          setLoggingOut(true);
-          try {
-            clearProfile();
-            // Global signOut invalidates all sessions (prevents auto-relogin)
-            await supabase.auth.signOut({ scope: 'global' });
-            // Belt-and-suspenders: wipe AsyncStorage tokens directly
-            await AsyncStorage.multiRemove([
-              'supabase.auth.token',
-              'supabase.auth.refreshToken',
-              'sb-qhjcmyszufmbcvdpsdjk-auth-token',
-            ]);
-            await AsyncStorage.clear();
-            navigation.reset({ index: 0, routes: [{ name: 'Auth' }] });
-          } catch (err) {
-            console.error('Logout error:', err);
-            Alert.alert('Error', 'Logout failed.');
-          } finally {
-            setLoggingOut(false);
-          }
-        },
-      },
-    ]);
+    const doLogout = async () => {
+      setLoggingOut(true);
+      try {
+        clearProfile();
+        await supabase.auth.signOut({ scope: 'global' });
+        await AsyncStorage.multiRemove([
+          'supabase.auth.token',
+          'supabase.auth.refreshToken',
+          'sb-qhjcmyszufmbcvdpsdjk-auth-token',
+        ]);
+        await AsyncStorage.clear();
+        // On web: force full page reload to clear all in-memory state
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+          window.location.href = '/';
+        } else {
+          navigation.reset({ index: 0, routes: [{ name: 'Auth' }] });
+        }
+      } catch (err) {
+        console.error('Logout error:', err);
+        Alert.alert('Error', 'Logout failed. Please try again.');
+      } finally {
+        setLoggingOut(false);
+      }
+    };
+
+    // On web: window.confirm is more reliable than Alert.alert
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      if (window.confirm('Are you sure you want to log out?')) {
+        doLogout();
+      }
+    } else {
+      Alert.alert('Log Out', 'Are you sure?', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Log Out', style: 'destructive', onPress: doLogout },
+      ]);
+    }
   };
 
   const handleSaveName = async () => {
