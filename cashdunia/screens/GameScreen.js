@@ -92,6 +92,8 @@ export default function GameScreen({ route, navigation }) {
   const [gemToastVis, setGemToastVis] = useState(false);
   // fromOffer: separate ad overlay for the offer flow (no gem, navigates to Verify)
   const [fromOfferAdVisible, setFromOfferAdVisible] = useState(false);
+  // Load error state
+  const [loadError, setLoadError] = useState(null);
 
   // Progress bar anim
   const progressAnim = useRef(new Animated.Value(0)).current;
