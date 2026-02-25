@@ -295,7 +295,7 @@ export const getLeaderboard = async (limit = 50) => {
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('id, name, email, coins, daily_coins, current_level')
+      .select('id, name, coins, daily_coins, current_level')
       .order('daily_coins', { ascending: false })
       .limit(limit);
     if (error) throw new Error(error.message);
