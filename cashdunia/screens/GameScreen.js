@@ -145,8 +145,9 @@ export default function GameScreen({ route, navigation }) {
 
       const cfg = LEVEL_CONFIG[data.current_level] || LEVEL_CONFIG[1];
       progressAnim.setValue((data.gems_this_level ?? 0) / cfg.gemTarget);
-    } catch (e) {}
-  };
+    } catch (e) {
+      setLoadError('Could not load game data. Tap here to retry.');
+    }
 
   const levelConfig = LEVEL_CONFIG[currentLevel] || LEVEL_CONFIG[1];
   const gemTarget = levelConfig.gemTarget;
