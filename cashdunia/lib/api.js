@@ -64,6 +64,15 @@ export const ensureUserRow = async (uid, email, name = '') => {
         referral_code: referralCode,
       });
       if (error) throw new Error(error.message);
+      await supabase.from('user_streaks').upsert(
+        {
+          user_id: uid,
+          streak_count: 0,
+          ads_watched_today: 0,
+          ads_watched_date: new Date().toISOString().slice(0, 10),
+        },
+        { onConflict: 'user_id' }
+      );
     }
   } catch (e) {
     // User row may already exist — not fatal
