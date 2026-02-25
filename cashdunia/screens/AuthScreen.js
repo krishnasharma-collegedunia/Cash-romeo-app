@@ -266,10 +266,12 @@ export default function AuthScreen({ navigation, route }) {
                   {loading ? <ActivityIndicator color={C.white} /> : <Text style={styles.btnText}>Login</Text>}
                 </TouchableOpacity>
 
-                {/* Google OAuth */}
-                <TouchableOpacity style={styles.googleBtn} onPress={handleGoogleLogin} activeOpacity={0.85}>
-                  <Text style={styles.googleBtnText}>🔍  Continue with Google</Text>
-                </TouchableOpacity>
+                {/* Google OAuth — web only */}
+                {Platform.OS === 'web' && (
+                  <TouchableOpacity style={styles.googleBtn} onPress={handleGoogleLogin} activeOpacity={0.85}>
+                    <Text style={styles.googleBtnText}>🔍  Continue with Google</Text>
+                  </TouchableOpacity>
+                )}
               </>
             ) : (
               <>
