@@ -280,8 +280,11 @@ export const applyReferralCode = async (uid, referralCode) => {
     // Update referred_by on user
     await supabase.from('users').update({ referred_by: referrer.id }).eq('id', uid);
 
+    // Signup-time referral bonus only. applyReferralCode in api.js handles the separate manual-code flow. These two paths are independent — never call both for the same user.
     // Give bonus coins to referrer
     await incrementCoins(referrer.id, 50);
+    // Referred user bonus — only awarded here (manual code entry flow). Signup-time bonus is handled separately in AuthScreen.js. These two flows are independent and will never both fire for the same user.
+    await incrementCoins(uid, 50);
 
     return true;
   } catch (e) {
