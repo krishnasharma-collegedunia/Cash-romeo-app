@@ -164,7 +164,9 @@ export default function AuthScreen({ navigation, route }) {
         if (referrer) {
           await supabase.from('users').update({ referred_by: referrer.id }).eq('id', user.id);
           await supabase.from('referrals').insert({ referrer_id: referrer.id, referred_id: user.id });
-          await supabase.rpc('increment_coins', { uid: user.id, amount: 25 });
+          // Signup-time referral bonus only. applyReferralCode in api.js handles the separate manual-code flow. These two paths are independent — never call both for the same user.
+          await supabase.rpc('increment_coins', { uid: referrer.id, amount: 50 });
+          await supabase.rpc('increment_coins', { uid: user.id, amount: 50 });
         }
       }
 
