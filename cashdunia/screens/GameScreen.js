@@ -391,7 +391,7 @@ export default function GameScreen({ route, navigation }) {
 
             {/* TOP SCORE banner */}
             <View style={styles.topScoreBanner}>
-              <Text style={styles.topScoreText}>TOP SCORE</Text>
+              <Text style={styles.topScoreText}>SESSION SCORE</Text>
             </View>
             <Text style={styles.topScoreNum}>{totalScore}</Text>
 
