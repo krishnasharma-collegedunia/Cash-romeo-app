@@ -102,8 +102,8 @@ export default function WithdrawalScreen({ navigation }) {
                 payment_address: paymentAddress.trim(),
                 status: 'pending',
               });
-              await updateUser(authUser.id, { coins: currentCoins - selectedTier.coins });
-              updateProfile({ coins: currentCoins - selectedTier.coins });
+              const newCoins = await deductCoins(authUser.id, selectedTier.coins);
+              updateProfile({ coins: newCoins });
               await loadData();
 
               // Show success modal with spring animation
