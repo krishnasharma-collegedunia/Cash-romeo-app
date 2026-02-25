@@ -301,6 +301,11 @@ export default function GameScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
+      {loadError && (
+        <TouchableOpacity onPress={() => { setLoadError(null); loadProfile(); }} style={{ backgroundColor: '#FF4444', padding: 10, borderRadius: 8, margin: 10 }}>
+          <Text style={{ color: '#fff', textAlign: 'center' }}>{loadError}</Text>
+        </TouchableOpacity>
+      )}
       <MockAdOverlay visible={adVisible} onAdComplete={awardGem} />
       {/* fromOffer ad: 10s wait → navigate to VerifyScreen (no gem awarded) */}
       <MockAdOverlay visible={fromOfferAdVisible} onAdComplete={handleFromOfferAdComplete} />
