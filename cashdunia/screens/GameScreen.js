@@ -148,6 +148,7 @@ export default function GameScreen({ route, navigation }) {
     } catch (e) {
       setLoadError('Could not load game data. Tap here to retry.');
     }
+  };
 
   const levelConfig = LEVEL_CONFIG[currentLevel] || LEVEL_CONFIG[1];
   const gemTarget = levelConfig.gemTarget;
