@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { C } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
 import { useUserStore } from '../store/userStore';
-import { getUser, insertWithdrawal, updateUser, getWithdrawals } from '../lib/api';
+import { getUser, insertWithdrawal, updateUser, getWithdrawals, deductCoins } from '../lib/api';
 import SkeletonBox from '../components/SkeletonBox';
 
 const TIERS = [
